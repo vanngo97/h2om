@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>H2OM – Molecular Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .phone {
+            width: 402px;
+            height: 875px;
+            background: #171A22;
+            border-radius: 44px;
+            border: 8px solid #2a2d36;
+            box-shadow: 0 30px 60px rgba(255,255,255,0.08);
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+        .screen {
+            position: absolute;
+            inset: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 48px 24px 48px;
+            display: none;
+        }
+        .screen::-webkit-scrollbar { display: none; }
+        .screen.active { display: block; }
+
+        .ring-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ring-wrap svg {
+            position: absolute;
+            top: 0; left: 0;
+            transform: rotate(-90deg);
+            pointer-events: none;
+        }
+        .ring-num {
+            position: relative;
+            z-index: 2;
+            font-weight: 700;
+            color: white;
+        }
+
+        .grad-morning { background: linear-gradient(135deg, #FFED86, #FF9F6F, #CE6606); }
+        .grad-night   { background: linear-gradient(135deg, #A486FF, #6F9CFF, #0642CE); }
+        .grad-ai      { background: linear-gradient(90deg, #FFCDFC, #AF38F9 40%, #C30A0D 65%, #FC5E61); }
+        .grad-sheet   { background: linear-gradient(170deg, #FFCDFC, #AF38F9 33%, #A486FF 60%, #6F9CFF); }
+        .grad-streak  { background: linear-gradient(180deg, #FC5E61, #FF9F6F); }
+
+        #activity-sheet {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%;
+            height: 70%;
+            border-radius: 20px 20px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+            z-index: 200;
+            padding: 28px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+        #activity-sheet.open { transform: translateY(0); }
+
+        button { cursor: pointer; font-family: 'Inter', sans-serif; }
+
+        .back-btn {
+            width: 32px; height: 32px;
+            border: 2px solid white;
+            border-radius: 50%;
+            background: none;
+            color: white;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .log-btn {
+            padding: 9px 20px;
+            background: white;
+            border-radius: 30px;
+            color: black;
+            font-size: 13px;
+            font-weight: 500;
+            border: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .log-btn.selected { background: #A486FF; color: white; }
+
+        .bbar {
+            width: 100%; height: 6px;
+            background: #E5E7EB;
+            border-radius: 999px;
+            position: relative;
+            margin: 12px 0 4px;
+        }
+        .bbar-fill {
+            height: 100%; border-radius: 999px;
+            position: absolute; left: 50%;
+        }
+        .bbar-mid {
+            position: absolute;
+            left: 50%; top: -4px;
+            width: 2px; height: 14px;
+            background: #374151; border-radius: 2px;
+        }
+        .bbar-labels {
+            display: flex; justify-content: space-between;
+            font-size: 9px; color: #9CA3AF;
+            font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; margin-bottom: 6px;
+        }
+
+        .card-orange { background: white; border: 2px solid #FF9F6F; border-radius: 6px; padding: 16px; margin-bottom: 10px; }
+        .card-blue   { background: white; border: 2px solid #0642CE; border-radius: 6px; padding: 16px; margin-bottom: 10px; }
+        .card-dark   { background: #1B1B1B; border-radius: 10px; padding: 16px; margin-bottom: 20px; }
+        .card-purple { background: rgba(164,134,255,0.15); border: 1px solid rgba(164,134,255,0.35); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+
+        .section-label { font-size: 13px; font-weight: 600; color: #8D8D8D; margin-bottom: 12px; }
+        .ai-card { border-radius: 10px; padding: 16px; color: white; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+<div class="phone">
+
+    <!-- ══════════ HOME ══════════ -->
+    <div id="s-home" class="screen active">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;">
+            <div onclick="go('s-baseline')" style="width:40px;height:40px;border-radius:50%;background:#D9D9D9;cursor:pointer;"></div>
+            <span style="font-size:13px;font-weight:600;letter-spacing:0.08em;opacity:0.8;">TODAY</span>
+            <div onclick="go('s-baseline')" style="background:rgba(99,102,241,0.2);color:#a5b4fc;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;">30%</div>
+        </div>
+
+        <div style="display:flex;justify-content:space-around;margin-bottom:28px;">
+            <!-- Morning ring -->
+            <div onclick="go('s-morning')" style="display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;">
+                <div class="ring-wrap" style="width:108px;height:108px;">
+                    <svg width="108" height="108" viewBox="0 0 108 108">
+                        <defs>
+                            <linearGradient id="gm" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#FFED86"/>
+                                <stop offset="60%" stop-color="#FF9F6F"/>
+                                <stop offset="100%" stop-color="#CE6606"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="54" cy="54" r="44" stroke="#2a2d36" stroke-width="10" fill="none"/>
+                        <circle cx="54" cy="54" r="44" stroke="url(#gm)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="66"/>
+                    </svg>
+                    <span class="ring-num" style="font-size:38px;">76</span>
+                </div>
+                <span style="font-size:13px;font-weight:600;">☀️ Prime</span>
+            </div>
+
+            <!-- Evening ring -->
+            <div id="ev-tap" onclick="tapEvening()" style="display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;">
+                <div class="ring-wrap" style="width:108px;height:108px;">
+                    <svg width="108" height="108" viewBox="0 0 108 108">
+                        <defs>
+                            <linearGradient id="gn" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#A486FF"/>
+                                <stop offset="60%" stop-color="#6F9CFF"/>
+                                <stop offset="100%" stop-color="#0642CE"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="54" cy="54" r="44" stroke="#2a2d36" stroke-width="10" fill="none"/>
+                        <circle id="ev-arc" cx="54" cy="54" r="44" stroke="#2a2d36" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5" style="transition:stroke-dashoffset 0.9s ease, stroke 0.3s ease;"/>
+                    </svg>
+                    <span id="ev-val" class="ring-num" style="font-size:20px;letter-spacing:0.05em;">Sync</span>
+                </div>
+                <span style="font-size:13px;font-weight:600;">🌙 Recover</span>
+            </div>
+        </div>
+
+        <div id="home-insight" class="card-dark" style="border:1px solid rgba(255,255,255,0.05);">
+            <p style="font-size:13px;font-weight:600;line-height:1.6;">Your nervous system is primed from a strong morning spike. You are ready for high cognitive and physical load today.</p>
+        </div>
+
+        <p class="section-label">Raw Scores</p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:28px;">
+            <div style="background:white;border:2px solid #FF9F6F;border-radius:6px;padding:10px 16px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:black;">
+                <span>Testosterone</span><span>+8%</span>
+            </div>
+            <div style="background:white;border:2px solid #FF9F6F;border-radius:6px;padding:10px 16px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:black;">
+                <span>Cortisol (AM)</span><span>Spike</span>
+            </div>
+            <div id="ev-preview" style="background:white;border:2px solid #0642CE;border-radius:6px;padding:10px 16px;display:flex;justify-content:space-between;font-size:13px;font-weight:600;color:#0642CE;opacity:0.4;transition:opacity 0.5s;">
+                <span>Pending Sync…</span><span>--</span>
+            </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding-bottom:16px;">
+            <button id="log-btn" onclick="toggleSheet()" style="width:173px;height:40px;background:white;border-radius:20px;border:none;font-size:13px;font-weight:600;">Activity Log</button>
+            <button class="grad-ai" style="width:173px;height:40px;border-radius:20px;border:none;color:white;font-size:13px;font-weight:600;">✦ Omnix AI</button>
+        </div>
+    </div>
+
+    <!-- ══════════ MORNING ══════════ -->
+    <div id="s-morning" class="screen">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+            <button class="back-btn" onclick="go('s-home')">←</button>
+            <span style="flex:1;text-align:center;font-size:13px;font-weight:600;padding-right:32px;">Morning Prime</span>
+        </div>
+        <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <div class="ring-wrap" style="width:140px;height:140px;">
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                    <defs>
+                        <linearGradient id="gm2" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#FFED86"/>
+                            <stop offset="60%" stop-color="#FF9F6F"/>
+                            <stop offset="100%" stop-color="#CE6606"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="70" cy="70" r="58" stroke="#2a2d36" stroke-width="12" fill="none"/>
+                    <circle cx="70" cy="70" r="58" stroke="url(#gm2)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="87"/>
+                </svg>
+                <span class="ring-num" style="font-size:50px;">76</span>
+            </div>
+        </div>
+        <div class="card-purple"><span style="color:#A486FF;font-size:15px;">⚡️</span><p style="font-size:12px;font-weight:500;color:#A486FF;line-height:1.5;">Still learning your biology. Keep testing daily and this score will sharpen over time.</p></div>
+        <div class="card-dark"><p style="font-size:13px;font-weight:600;line-height:1.6;">Your anabolic window is fully primed. Target heavy lifting before 1:00 PM.</p></div>
+        <p class="section-label">Biomarkers</p>
+        <div class="card-orange">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:black;"><span>Free Testosterone</span><span style="color:#CE6606;">+8%</span></div>
+            <div class="bbar"><div class="bbar-mid"></div><div class="bbar-fill" style="width:30%;background:#CE6606;"></div></div>
+            <div class="bbar-labels"><span>Low</span><span>Your 7-day avg</span><span>High</span></div>
+            <p style="font-size:11px;color:#6B7280;line-height:1.4;">Supports muscle recovery, energy, and drive.</p>
+        </div>
+        <div class="card-orange">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:black;"><span>Cortisol (CAR)</span><span style="color:#CE6606;">Expected Spike</span></div>
+            <div class="bbar"><div class="bbar-mid"></div><div class="bbar-fill" style="width:40%;background:#FF9F6F;"></div></div>
+            <div class="bbar-labels"><span>Low</span><span>Your 7-day avg</span><span>High</span></div>
+            <p style="font-size:11px;color:#6B7280;line-height:1.4;">Regulates awakening, metabolism, and acute stress.</p>
+        </div>
+        <div class="card-orange" style="margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:black;"><span>Alpha-Amylase</span><span style="color:#16a34a;">Normal</span></div>
+            <div class="bbar"><div class="bbar-mid"></div><div class="bbar-fill" style="width:8%;background:#16a34a;"></div></div>
+            <div class="bbar-labels"><span>Low</span><span>Your 7-day avg</span><span>High</span></div>
+            <p style="font-size:11px;color:#6B7280;line-height:1.4;">Sympathetic nervous system marker. Low = calm baseline.</p>
+        </div>
+        <div class="ai-card grad-ai">✦ Omnix AI: Prioritize high-protein breakfast to capitalize on elevated testosterone.</div>
+    </div>
+
+    <!-- ══════════ EVENING ══════════ -->
+    <div id="s-evening" class="screen">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+            <button class="back-btn" onclick="go('s-home')">←</button>
+            <span style="flex:1;text-align:center;font-size:13px;font-weight:600;padding-right:32px;">Night Recover</span>
+        </div>
+        <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <div class="ring-wrap" style="width:140px;height:140px;">
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                    <defs>
+                        <linearGradient id="gn2" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#A486FF"/>
+                            <stop offset="60%" stop-color="#6F9CFF"/>
+                            <stop offset="100%" stop-color="#0642CE"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="70" cy="70" r="58" stroke="#2a2d36" stroke-width="12" fill="none"/>
+                    <circle cx="70" cy="70" r="58" stroke="url(#gn2)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="167"/>
+                </svg>
+                <span class="ring-num" style="font-size:50px;">54</span>
+            </div>
+        </div>
+        <div class="card-purple"><span style="color:#A486FF;font-size:15px;">⚡️</span><p style="font-size:12px;font-weight:500;color:#A486FF;line-height:1.5;">Still learning your biology. Keep testing daily and this score will sharpen over time.</p></div>
+        <div class="card-dark"><p style="font-size:13px;font-weight:600;line-height:1.6;">Your nervous system is resisting rest. Active down-regulation required.</p></div>
+        <p class="section-label">Biomarkers</p>
+        <div class="card-blue">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#0642CE;"><span>Evening Cortisol</span><span style="color:#dc2626;">Elevated</span></div>
+            <div class="bbar"><div class="bbar-mid"></div><div class="bbar-fill" style="width:35%;background:#ef4444;"></div></div>
+            <div class="bbar-labels" style="color:#9CA3AF;"><span>Low</span><span>Your 7-day avg</span><span>High</span></div>
+            <p style="font-size:11px;color:#6B7280;line-height:1.4;">Should be dropping. Currently blocking melatonin production.</p>
+        </div>
+        <div class="card-blue">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#0642CE;"><span>Alpha-Amylase</span><span style="color:#f97316;">Active</span></div>
+            <div class="bbar"><div class="bbar-mid"></div><div class="bbar-fill" style="width:25%;background:#f97316;"></div></div>
+            <div class="bbar-labels" style="color:#9CA3AF;"><span>Low</span><span>Your 7-day avg</span><span>High</span></div>
+            <p style="font-size:11px;color:#6B7280;line-height:1.4;">Sympathetic nervous system still engaged.</p>
+        </div>
+        <div class="card-blue" style="margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#0642CE;"><span>Melatonin</span><span style="color:#f97316;">Low</span></div>
+            <div class="bbar"><div class="bbar-mid"></div><div class="bbar-fill" style="width:0%;background:#6F9CFF;left:30%;"></div></div>
+            <div class="bbar-labels" style="color:#9CA3AF;"><span>Low</span><span>Your 7-day avg</span><span>High</span></div>
+            <p style="font-size:11px;color:#6B7280;line-height:1.4;">Sleep onset hormone suppressed by elevated cortisol.</p>
+        </div>
+        <div class="ai-card grad-ai">✦ Omnix AI: Engage in 10 minutes of box breathing now to force cortisol down before sleep.</div>
+    </div>
+
+    <!-- ══════════ BASELINE ══════════ -->
+    <div id="s-baseline" class="screen">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+            <button class="back-btn" onclick="go('s-home')">←</button>
+            <span style="flex:1;text-align:center;font-size:13px;font-weight:600;padding-right:32px;">Baseline & Streak</span>
+        </div>
+        <p class="section-label">Baseline Confidence</p>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            <div style="flex:1;background:white;border-radius:999px;height:26px;padding:4px;">
+                <div style="width:30%;height:100%;background:#6366F1;border-radius:999px;"></div>
+            </div>
+            <span style="font-size:15px;font-weight:700;">30%</span>
+        </div>
+        <div style="background:#A486FF;border-radius:10px;padding:16px;margin-bottom:28px;">
+            <p style="font-size:13px;font-weight:600;line-height:1.6;">⚡️ The system is mapping your unique diurnal rhythm. Keep sampling time consistent to tighten the statistical interval.</p>
+        </div>
+        <p class="section-label">🎉 Streak</p>
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px;">
+            <div class="grad-streak" style="width:87px;height:87px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">
+                <span style="font-size:36px;font-weight:700;line-height:1;">3</span>
+                <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Days</span>
+            </div>
+            <div>
+                <p style="font-size:13px;font-weight:600;margin-bottom:8px;">This week</p>
+                <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <div style="width:24px;height:24px;border-radius:50%;background:#E0FFCE;"></div>
+                    <div style="width:24px;height:24px;border-radius:50%;background:#E0FFCE;"></div>
+                    <div style="width:24px;height:24px;border-radius:50%;background:#E0FFCE;"></div>
+                    <div style="width:24px;height:24px;border-radius:50%;background:#D9D9D9;"></div>
+                    <div style="width:24px;height:24px;border-radius:50%;background:#D9D9D9;"></div>
+                </div>
+                <p style="font-size:11px;opacity:0.6;">Next milestone: 7 days</p>
+            </div>
+        </div>
+        <p class="section-label">Biomarker Readiness</p>
+        <div style="display:flex;flex-direction:column;gap:8px;padding-bottom:20px;">
+            <div style="background:white;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;"><span style="font-size:13px;font-weight:600;color:black;">Testosterone</span><span style="font-size:12px;color:black;opacity:0.5;font-style:italic;">Gathering baseline</span></div>
+            <div style="background:white;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;"><span style="font-size:13px;font-weight:600;color:black;">Cortisol</span><span>✅</span></div>
+            <div style="background:white;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;"><span style="font-size:13px;font-weight:600;color:black;">Alpha-Amylase</span><span style="font-size:12px;color:black;opacity:0.5;font-style:italic;">Gathering baseline</span></div>
+            <div style="background:white;border-radius:6px;padding:12px 16px;display:flex;justify-content:space-between;"><span style="font-size:13px;font-weight:600;color:black;">Melatonin</span><span style="font-size:12px;color:black;opacity:0.5;font-style:italic;">Gathering baseline</span></div>
+        </div>
+    </div>
+
+    <!-- ══════════ ACTIVITY SHEET ══════════ -->
+    <div id="activity-sheet" class="grad-sheet">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+            <div>
+                <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;">Activity Log</h2>
+                <p style="font-size:11px;font-weight:300;opacity:0.85;max-width:100%;line-height:1.5;">This helps us to provide more accurate and personalized insights.</p>
+            </div>
+            <button onclick="toggleSheet()" style="background:none;border:none;color:white;font-size:26px;line-height:1;">×</button>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:20px;padding-bottom:16px;">
+            <div>
+                <p style="font-size:15px;font-weight:500;margin-bottom:10px;">How much sleep you had last night?</p>
+                <div style="display:flex;gap:10px;">
+                    <button class="log-btn" onclick="pick(this,'sleep')">Less than 6 hours</button>
+                    <button class="log-btn" onclick="pick(this,'sleep')">6-7 hours</button>
+                    <button class="log-btn" onclick="pick(this,'sleep')">More than 7 hours</button>
+                </div>
+            </div>
+            <div>
+                <p style="font-size:15px;font-weight:500;margin-bottom:10px;">Did you exercise today?</p>
+                <div style="display:flex;gap:10px;">
+                    <button class="log-btn" onclick="pick(this,'exercise')">Yes</button>
+                    <button class="log-btn" onclick="pick(this,'exercise')">No</button>
+                </div>
+            </div>
+            <div>
+                <p style="font-size:15px;font-weight:500;margin-bottom:10px;">Caffeine after 2 PM today?</p>
+                <div style="display:flex;gap:10px;">
+                    <button class="log-btn" onclick="pick(this,'caffeine')">Yes</button>
+                    <button class="log-btn" onclick="pick(this,'caffeine')">No</button>
+                </div>
+            </div>
+            <div>
+                <p style="font-size:15px;font-weight:500;margin-bottom:10px;">Any drinks today?</p>
+                <div style="display:flex;gap:10px;">
+                    <button class="log-btn" onclick="pick(this,'alcohol')">Yes</button>
+                    <button class="log-btn" onclick="pick(this,'alcohol')">No</button>
+                </div>
+            </div>
+            <div>
+                <p style="font-size:15px;font-weight:500;margin-bottom:10px;">How stressed is today?</p>
+                <div style="display:flex;gap:10px;">
+                    <button class="log-btn" onclick="pick(this,'stress')">Low</button>
+                    <button class="log-btn" onclick="pick(this,'stress')">Medium</button>
+                    <button class="log-btn" onclick="pick(this,'stress')">High</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:center;padding-top:12px;">
+            <button onclick="saveLog()" style="width:123px;height:40px;background:#070262;border-radius:20px;border:none;color:white;font-size:16px;font-weight:600;">Save</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const log = {};
+    let eveningSynced = false;
+
+    function go(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function toggleSheet() {
+        document.getElementById('activity-sheet').classList.toggle('open');
+    }
+
+    function tapEvening() {
+        if (!eveningSynced) {
+            const val = document.getElementById('ev-val');
+            val.style.fontSize = '10px';
+            val.textContent = 'Syncing…';
+            setTimeout(() => {
+                document.getElementById('ev-arc').setAttribute('stroke', 'url(#gn)');
+                document.getElementById('ev-arc').setAttribute('stroke-dashoffset', '127');
+                val.style.fontSize = '38px';
+                val.textContent = '54';
+                const prev = document.getElementById('ev-preview');
+                prev.style.opacity = '1';
+                prev.innerHTML = '<span>Evening Cortisol</span><span style="color:#dc2626;">Elevated</span>';
+                eveningSynced = true;
+            }, 1200);
+        } else {
+            go('s-evening');
+        }
+    }
+
+    function pick(btn, group) {
+        btn.closest('div').querySelectorAll('.log-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        log[group] = btn.textContent;
+    }
+
+    function saveLog() {
+        toggleSheet();
+        const btn = document.getElementById('log-btn');
+        btn.style.background = '#E0FFCE';
+        btn.textContent = '✔️ Logged';
+
+        const flags = [];
+        if (log.caffeine === 'Yes') flags.push('late caffeine');
+        if (log.alcohol === 'Yes') flags.push('alcohol');
+        if (log.stress === 'High' || log.stress === 'Medium') flags.push('elevated stress');
+
+        const p = document.querySelector('#home-insight p');
+        p.textContent = flags.length
+            ? `⚡️ You started off strong but tonight's read may be affected by ${flags.join(' and ')}.`
+            : `✅ Clean day logged. You're doing great! Tonight score will reflect your true baseline.`;
+    }
+</script>
+</body>
+</html>
